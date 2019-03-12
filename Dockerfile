@@ -5,6 +5,7 @@ RUN crontab /etc/cron/crontab
 
 RUN apk --no-cache add ca-certificates \
 		firefox-esr \
+		tzdata \
 		wget
 
 RUN cd /tmp \
@@ -19,7 +20,8 @@ RUN pip3 install -r /usr/local/requirements.txt
 COPY main.py /usr/local
 WORKDIR /usr/local
 
-ENV URL="https://ing.de" \
+ENV TZ="Europe/Berlin" \
+    URL="https://ing.de" \
     PICTUREPATH="/usr/local" \
     ZUGANGSNUMMER="user" \
     PIN="pass" \

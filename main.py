@@ -28,15 +28,21 @@ print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - Oeffne Startse
 
 # Startseite
 browser.get(url)
-time.sleep(15)
-browser.get_screenshot_as_file(picturepath + "/1.png")
+time.sleep(20)
+try:
+    browser.get_screenshot_as_file(picturepath + "/1.png")
+except WebDriverException:
+    print("Bild 1 konnte nicht gespeichert werden.")
 browser.find_element_by_xpath("/html/body/div[1]/div/main/div[2]/div/fieldset/div/form/div[1]/span/input").send_keys(zugangsnummer)
 browser.find_element_by_xpath("/html/body/div[1]/div/main/div[2]/div/fieldset/div/form/div[2]/span/input").send_keys(pin)
 
 # Keyeingabe
 browser.find_element_by_xpath('/html/body/div[1]/div/main/div[2]/div/fieldset/div/form/div[3]/div/div/div[1]/button').submit()
-time.sleep(15)
-browser.get_screenshot_as_file(picturepath + "/2.png")
+time.sleep(20)
+try:
+    browser.get_screenshot_as_file(picturepath + "/2.png")
+except WebDriverException:
+    print("Bild 2 konnte nicht gespeichert werden.")
 
 # Es werden alle 6 Felder geprüft und bei Bedarf befüllt.
 keybuttons = ["/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[3]/div[4]/a[1]",
@@ -59,7 +65,10 @@ for i in range(len(key)):
         break
 
 
-browser.get_screenshot_as_file(picturepath + "/3.png")
+try:
+    browser.get_screenshot_as_file(picturepath + "/3.png")
+except WebDriverException:
+    print("Bild 3 konnte nicht gespeichert werden.")
 
 for j in range(len(key)):
     keyfield = browser.find_element_by_xpath("/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[2]/ul/li[" + str(j+1) + "]")
@@ -70,12 +79,18 @@ for j in range(len(key)):
         break
 
 
-browser.get_screenshot_as_file(picturepath + "/4.png")
+try:
+    browser.get_screenshot_as_file(picturepath + "/4.png")
+except WebDriverException:
+    print("Bild 4 konnte nicht gespeichert werden.")
 
 browser.find_element_by_xpath("/html/body/div[1]/div/main/div/div/form/div/section/div/button[1]").click()
-time.sleep(15)
+time.sleep(30)
 
-browser.get_screenshot_as_file(picturepath + "/5.png")
+try:
+    browser.get_screenshot_as_file(picturepath + "/5.png")
+except WebDriverException:
+    print("Bild 5 konnte nicht gespeichert werden.")
 balance = browser.find_element_by_xpath('/html/body/div[1]/div/main/div/div/div/section[2]/div[1]/div[1]/div[1]/div[2]/a/span[4]/span[1]').text
 
 print(balance)

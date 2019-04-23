@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import requests
 import time
@@ -10,9 +11,19 @@ from urllib.parse import urlencode, quote_plus
 from pathlib import Path
 from pprint import pprint
 
+logger = logging.getLogger("postbank")
+logger.setLevel(logging.INFO)
+fh = logging.StreamHandler()
+fh.setLevel(logging.INFO)
+# create formatter and add it to the handlers
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+fh.setFormatter(formatter)
+# add the handlers to the logger
+logger.addHandler(fh)
+
 opts = Options()
 opts.headless = True
-print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - Starte FireFox")
+logging.info("aStarte FireFox")
 browser = Firefox(options=opts)
 
 #Setzen der Variablen
@@ -96,7 +107,7 @@ balance = browser.find_element_by_xpath('/html/body/div[1]/div/main/div/div/div/
 print(balance)
 
 # Logout
-browser.find_element_by_xpath('/html/body/div[1]/div/navigation-header/div/div/div[3]/ing-diba-session/ing-diba-session-button/a').click()
+browser.get('https://banking.ing.de/app/logout')
 time.sleep(20)
 try:
     browser.get_screenshot_as_file(picturepath + "/6.png")

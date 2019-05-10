@@ -1,4 +1,3 @@
-import datetime
 import logging
 import os
 import requests
@@ -9,7 +8,6 @@ from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import WebDriverException
 from urllib.parse import urlencode, quote_plus
 from pathlib import Path
-from pprint import pprint
 
 logger = logging.getLogger("postbank")
 logger.setLevel(logging.INFO)
@@ -23,7 +21,7 @@ logger.addHandler(fh)
 
 opts = Options()
 opts.headless = True
-logging.info("aStarte FireFox")
+logging.info("Starte FireFox")
 browser = Firefox(options=opts)
 
 #Setzen der Variablen
@@ -35,15 +33,16 @@ key = os.environ.get('KEY')
 telegrambotkey = os.environ.get('TELEGRAMBOTKEY')
 chatid = os.environ.get('CHATID')
 
-print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - Oeffne Startseite")
+logging.info("Oeffne Startseite")
 
 # Startseite
 browser.get(url)
-time.sleep(20)
+time.sleep(30)
 try:
     browser.get_screenshot_as_file(picturepath + "/1.png")
 except WebDriverException:
-    print("Bild 1 konnte nicht gespeichert werden.")
+    logging.info("Bild 1 konnte nicht gespeichert werden.")
+
 browser.find_element_by_xpath("/html/body/div[1]/div/main/div[2]/div/fieldset/div/form/div[1]/span/input").send_keys(zugangsnummer)
 browser.find_element_by_xpath("/html/body/div[1]/div/main/div[2]/div/fieldset/div/form/div[2]/span/input").send_keys(pin)
 
@@ -53,7 +52,7 @@ time.sleep(20)
 try:
     browser.get_screenshot_as_file(picturepath + "/2.png")
 except WebDriverException:
-    print("Bild 2 konnte nicht gespeichert werden.")
+    logging.info("Bild 2 konnte nicht gespeichert werden.")
 
 # Es werden alle 6 Felder geprüft und bei Bedarf befüllt.
 keybuttons = ["/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[3]/div[4]/a[1]",
@@ -70,7 +69,7 @@ keybuttons = ["/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div
 for i in range(len(key)):
     keyfield = browser.find_element_by_xpath("/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[2]/ul/li[" + str(i+1) + "]")
     if keyfield.get_attribute("class") == "active focus":
-        print(key[i])
+        logging.info(key[i])
         browser.find_element_by_xpath(keybuttons[int(key[i])]).click()
         time.sleep(5)
         break
@@ -79,12 +78,12 @@ for i in range(len(key)):
 try:
     browser.get_screenshot_as_file(picturepath + "/3.png")
 except WebDriverException:
-    print("Bild 3 konnte nicht gespeichert werden.")
+    logging.info("Bild 3 konnte nicht gespeichert werden.")
 
 for j in range(len(key)):
     keyfield = browser.find_element_by_xpath("/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[2]/ul/li[" + str(j+1) + "]")
     if keyfield.get_attribute("class") == "active focus":
-        print(key[j])
+        logging.info(key[j])
         browser.find_element_by_xpath(keybuttons[int(key[j])]).click()
         time.sleep(5)
         break
@@ -93,7 +92,7 @@ for j in range(len(key)):
 try:
     browser.get_screenshot_as_file(picturepath + "/4.png")
 except WebDriverException:
-    print("Bild 4 konnte nicht gespeichert werden.")
+    logging.info("Bild 4 konnte nicht gespeichert werden.")
 
 browser.find_element_by_xpath("/html/body/div[1]/div/main/div/div/form/div/section/div/button[1]").click()
 time.sleep(30)
@@ -101,10 +100,10 @@ time.sleep(30)
 try:
     browser.get_screenshot_as_file(picturepath + "/5.png")
 except WebDriverException:
-    print("Bild 5 konnte nicht gespeichert werden.")
+    logging.info("Bild 5 konnte nicht gespeichert werden.")
 balance = browser.find_element_by_xpath('/html/body/div[1]/div/main/div/div/div/section[2]/div[1]/div[1]/div[1]/div[2]/a/span[4]/span[1]').text
 
-print(balance)
+logging.info(balance)
 
 # Logout
 browser.get('https://banking.ing.de/app/logout')
@@ -112,7 +111,7 @@ time.sleep(20)
 try:
     browser.get_screenshot_as_file(picturepath + "/6.png")
 except WebDriverException:
-    print("Screenshot 6 kann nicht gespeichert werden...")
+    logging.info("Screenshot 6 kann nicht gespeichert werden...")
 
 browser.quit()
 
@@ -133,7 +132,7 @@ if balance != oldbalance:
     payload = {'chat_id': chatid, 'text': text}
     result = urlencode(payload, quote_via=quote_plus)
     r = requests.get("https://api.telegram.org/" + telegrambotkey + "/sendMessage?" + result)
-    pprint(r.json())
+    logging.info(r.json())
     filestore = open(picturepath + "/balance.txt", "w")
     filestore.write(balance)
     filestore.close()

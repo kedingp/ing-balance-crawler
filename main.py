@@ -64,6 +64,28 @@ for zugangsnummer in zugangsnummern:
     popup_element = WebDriverWait(browser, 10).until(
         EC.presence_of_element_located((By.XPATH, '//*[contains(@id, "overlay-content--")]'))
     )
+# //*[@id="dialogContent-na3zqnfcsp"]//ing-cc-button-87217[1]
+    #//*[@id="dialogContent-gnkpwj47d6"]
+# /html/body/div[3]/div[2]/ing-cc-dialog-frame-87215/ing-cc-dialog-level0-87212//ing-cc-button-87217[1]
+    #//*[@id="dialogContent-6nx5r5surc"]
+    # Now, find the specific button within the popup using a relative XPath
+    # //*[@id="dialogContent-cqnsdh0e0b"]
+    # //*[@id="dialogContent-cqnsdh0e0b"]//div[3]
+    #//*[@id="dialogContent-1cwzaejzzw"]//div[3]/a[1]//*[@id="dialogContent-znjvxpr4uk"]//ing-cc-button-40828[1]
+    #//*[@id="dialogContent-h260cn1xz3"]
+    input = """return document.querySelector('[id^="dialogContent-"]').shadowRoot.querySelector('[data-tag-name="ing-cc-button"]')"""
+
+    WebDriverWait(browser, 20).until(EC.element_to_be_clickable((browser.execute_script(input)))).click()
+
+    # def expand_shadow_element(element):
+    #     shadow_root = browser.execute_script('return arguments[0].shadowRoot', element)
+    #     return shadow_root
+
+    # outer = expand_shadow_element(popup_element)
+    # inner = outer.find_element(By.XPATH, '//*[contains(@id, "ing-cc-button")]')
+    # inner.click()
+        
+
 
     zugang_field = browser.find_element(By.XPATH, '//*[@id="id6"]')
     counter = 0
@@ -82,8 +104,6 @@ for zugangsnummer in zugangsnummern:
     # Keyeingabe
     try:
         browser.find_element(By.XPATH, '//*[@id="ida"]').click()
-        # //*[@id="id19"]/label[1]/span[2]
-        # //*[@id="id19"]/label[1]/span[2]
         browser.find_element(By.XPATH, '//*[@id="id19"]/label[1]/span[1]').click()
         browser.find_element(By.XPATH, '//*[@id="id17"]').click()
     except Exception:

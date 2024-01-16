@@ -4,6 +4,12 @@ on: [push]
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
+
+    env:
+      GMAIL_PIN: ${{ secrets.GMAIL_PIN }}
+      GMAIL_FROM_ADDRESS: ${{ secrets.GMAIL_FROM_ADDRESS }}
+      GMAIL_TO_ADRESS: ${{ secrets.GMAIL_TO_ADRESS }}
+
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
@@ -24,6 +30,11 @@ jobs:
 
       - name: Run send_email.py
         run: python send_email.py
+        env:
+          GMAIL_PIN: ${{ secrets.GMAIL_PIN }}
+          GMAIL_FROM_ADDRESS: ${{ secrets.GMAIL_FROM_ADDRESS }}
+          GMAIL_TO_ADRESS: ${{ secrets.GMAIL_TO_ADRESS }}
+
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}

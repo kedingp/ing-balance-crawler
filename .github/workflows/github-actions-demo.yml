@@ -16,10 +16,10 @@ jobs:
       GMAIL_FROM_ADDRESS: ${{ secrets.GMAIL_FROM_ADDRESS }}
       GMAIL_TO_ADRESS: ${{ secrets.GMAIL_TO_ADRESS }}
       DROPBOX_API_KEY: ${{ secrets.DROPBOX_API_KEY }}
-      ING_URL: ${{ secrets.ING_URL }}
+      ING_URL: ${{ vars.ING_URL }}
       ING_ZUGANGSNUMMER_1: ${{ secrets.ING_ZUGANGSNUMMER_1 }}
       ING_ZUGANGSNUMMER_2: ${{ secrets.ING_ZUGANGSNUMMER_2 }}
-      ING_PIN: ${{ vars.ING_PIN }}
+      ING_PIN: ${{ secrets.ING_PIN }}
 
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
@@ -60,10 +60,10 @@ jobs:
           GMAIL_FROM_ADDRESS: ${{ secrets.GMAIL_FROM_ADDRESS }}
           GMAIL_TO_ADRESS: ${{ secrets.GMAIL_TO_ADRESS }}
           DROPBOX_API_KEY: ${{ secrets.DROPBOX_API_KEY }}
-          ING_URL: ${{ secrets.ING_URL }}
+          ING_URL: ${{ vars.ING_URL }}
           ING_ZUGANGSNUMMER_1: ${{ secrets.ING_ZUGANGSNUMMER_1 }}
           ING_ZUGANGSNUMMER_2: ${{ secrets.ING_ZUGANGSNUMMER_2 }}
-          ING_PIN: ${{ vars.ING_PIN }}
+          ING_PIN: ${{ secrets.ING_PIN }}
 
       - name: List files in the repository
         run: |

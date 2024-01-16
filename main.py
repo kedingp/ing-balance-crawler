@@ -6,11 +6,11 @@ from time import sleep
 from datetime import datetime
 
 
-from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 logger = logging.getLogger("myLogger")
 logger.setLevel(logging.INFO)
@@ -29,17 +29,13 @@ csv_file_path = 'kontostaende.csv'
 file_exists = os.path.isfile(csv_file_path)
 
 
-opts = Options()
-opts.headless = True
 #opts.add_experimental_option('prefs', {'profile.default_content_setting_values.cookies': 1})
 logging.info("Starte Chrome")
 
-options = webdriver.ChromeOptions()
 
-# Set preferences to enable cookies
-options.add_experimental_option('prefs', {'profile.default_content_setting_values.cookies': 1})
-options.add_experimental_option('prefs', {"profile.block_third_party_cookies": False})
-
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--disable-gpu")
 
 
 
@@ -59,7 +55,7 @@ gmail_to = os.environ.get('GMAIL_TO_ADRESS')
 for zugangsnummer in zugangsnummern:
     logging.info("Oeffne Startseite")
     # Launch the browser with the modified preferences
-    browser = webdriver.Chrome(options=options)
+    browser = webdriver.Chrome(options=chrome_options)
     browser.get(url)
     # Startseite#
     #/html/body/div[3]

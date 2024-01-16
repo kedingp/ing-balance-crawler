@@ -41,29 +41,9 @@ jobs:
 
       - name: Run main.py
         run: python main.py
-        env:
-          GMAIL_PIN: ${{ secrets.GMAIL_PIN }}
-          GMAIL_FROM_ADDRESS: ${{ secrets.GMAIL_FROM_ADDRESS }}
-          GMAIL_TO_ADRESS: ${{ secrets.GMAIL_TO_ADRESS }}
-      
-      - name: Run send_email.py
-        run: python send_email.py
-        env:
-          GMAIL_PIN: ${{ secrets.GMAIL_PIN }}
-          GMAIL_FROM_ADDRESS: ${{ secrets.GMAIL_FROM_ADDRESS }}
-          GMAIL_TO_ADRESS: ${{ secrets.GMAIL_TO_ADRESS }}
 
       - name: Run dropbox connection
         run: python check_dropbox.py
-        env:
-          GMAIL_PIN: ${{ secrets.GMAIL_PIN }}
-          GMAIL_FROM_ADDRESS: ${{ secrets.GMAIL_FROM_ADDRESS }}
-          GMAIL_TO_ADRESS: ${{ secrets.GMAIL_TO_ADRESS }}
-          DROPBOX_API_KEY: ${{ secrets.DROPBOX_API_KEY }}
-          ING_URL: ${{ vars.ING_URL }}
-          ING_ZUGANGSNUMMER_1: ${{ secrets.ING_ZUGANGSNUMMER_1 }}
-          ING_ZUGANGSNUMMER_2: ${{ secrets.ING_ZUGANGSNUMMER_2 }}
-          ING_PIN: ${{ secrets.ING_PIN }}
 
       - name: List files in the repository
         run: |

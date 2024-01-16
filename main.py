@@ -114,7 +114,7 @@ for zugangsnummer in zugangsnummern:
     # Authentication
     s.login(gmail_from, gmail_pin)
     # message to be sent
-    message = "Subject: Kontostandsabfrage ING\nBitte bestaetige die Kontostandsabfrage in der Ing Banking App in den naechsten 20 Minuten."
+    message = f"Subject: Kontostandsabfrage ING\nBitte bestaetige die Kontostandsabfrage fuer das Konto {zugangsnummer} in der Ing Banking App in den naechsten 20 Minuten."
     # sending the mail
     s.sendmail(gmail_from, gmail_to, message)
     # terminating the session
@@ -124,6 +124,7 @@ for zugangsnummer in zugangsnummern:
         EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/main/div/div[1]/div/section[2]/div[1]/div/div/div[2]/a/span[5]/span[1]'))).text
     browser.close()
 
+    print(f"balance: {balance}")
     data = [
     {'date': datetime.now().strftime('%Y-%m-%d'), 'bank account': zugangsnummer, 'balance': balance.replace('.', '')},
     ]

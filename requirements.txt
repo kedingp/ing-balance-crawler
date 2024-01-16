@@ -1,2 +1,4 @@
 requests
 selenium
+smtplib
+python-dotenv

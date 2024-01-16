@@ -1,23 +1,15 @@
 import logging
+import smtplib
 import csv
 import os
-import requests
-import time
-import dotenv
-import pickle
 from time import sleep
-import smtplib
 from datetime import datetime
 
 
-from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from urllib.parse import urlencode, quote_plus
-from pathlib import Path
 from selenium import webdriver
 
 logger = logging.getLogger("myLogger")
@@ -38,9 +30,9 @@ file_exists = os.path.isfile(csv_file_path)
 
 
 opts = Options()
-opts.headless = False
+opts.headless = True
 #opts.add_experimental_option('prefs', {'profile.default_content_setting_values.cookies': 1})
-logging.info("Starte FireFox")
+logging.info("Starte Chrome")
 
 options = webdriver.ChromeOptions()
 
@@ -55,12 +47,11 @@ options.add_experimental_option('prefs', {"profile.block_third_party_cookies": F
 #browser = Firefox(options=opts)
 
 #Setzen der Variablen
-url = os.environ.get('URL')
-picturepath = os.environ.get('PICTUREPATH', '/tmp/home')
-zugangsnummer_1 = os.environ.get('ZUGANGSNUMMER_1')
-zugangsnummer_2 = os.environ.get('ZUGANGSNUMMER_2')
+url = os.environ.get('ING_URL')
+zugangsnummer_1 = os.environ.get('ING_ZUGANGSNUMMER_1')
+zugangsnummer_2 = os.environ.get('ING_ZUGANGSNUMMER_2')
 zugangsnummern = [zugangsnummer_1, zugangsnummer_2]
-pin = os.environ.get('PIN')
+pin = os.environ.get('ING_PIN')
 gmail_pin = os.environ.get('GMAIL_PIN')
 gmail_from = os.environ.get('GMAIL_FROM_ADDRESS')
 gmail_to = os.environ.get('GMAIL_TO_ADRESS')
@@ -79,12 +70,15 @@ for zugangsnummer in zugangsnummern:
     )
 
     zugang_field = browser.find_element(By.XPATH, '//*[@id="id6"]')
-
+    counter = 0
     while True:
         try:
             zugang_field.send_keys(zugangsnummer)
             break
         except Exception:
+            if counter >= 5:
+                raise Exception("Cookies haven't been accepted. Stop continuation.")
+            counter += 1
             sleep(2)
     pin_field = browser.find_element(By.XPATH, '//*[@id="id7"]')
     pin_field.send_keys(pin)
@@ -98,20 +92,17 @@ for zugangsnummer in zugangsnummern:
         browser.find_element(By.XPATH, '//*[@id="id17"]').click()
     except Exception:
         pass
-# //*[@id="id897bb87e"]/span[1]
-# /html/body/div[1]/div/main/div/div[1]/div/section[2]/div[1]/div/div/div[2]/a/span[5]/span[1]
-    # creates SMTP session
-    # s = smtplib.SMTP('smtp.gmail.com', 587, timeout=10)
-    # # start TLS for security
-    # s.starttls()
-    # # Authentication
-    # s.login(gmail_from, gmail_pin)
-    # # message to be sent
-    # message = "Subject: Kontostandsabfrage ING\nBitte bestaetige die Kontostandsabfrage in der Ing Banking App in den naechsten 20 Minuten."
-    # # sending the mail
-    # s.sendmail(gmail_from, gmail_to, message)
-    # # terminating the session
-    # s.quit()
+    s = smtplib.SMTP('smtp.gmail.com', 587, timeout=10)
+    # start TLS for security
+    s.starttls()
+    # Authentication
+    s.login(gmail_from, gmail_pin)
+    # message to be sent
+    message = "Subject: Kontostandsabfrage ING\nBitte bestaetige die Kontostandsabfrage in der Ing Banking App in den naechsten 20 Minuten."
+    # sending the mail
+    s.sendmail(gmail_from, gmail_to, message)
+    # terminating the session
+    s.quit()
 
     balance = WebDriverWait(browser, 1200).until(
         EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/main/div/div[1]/div/section[2]/div[1]/div/div/div[2]/a/span[5]/span[1]'))).text

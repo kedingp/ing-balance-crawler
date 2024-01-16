@@ -1,15 +1,26 @@
 import logging
+import csv
 import os
 import requests
 import time
+import dotenv
+import pickle
+from time import sleep
+import smtplib
+from datetime import datetime
+
 
 from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from urllib.parse import urlencode, quote_plus
 from pathlib import Path
+from selenium import webdriver
 
-logger = logging.getLogger("postbank")
+logger = logging.getLogger("myLogger")
 logger.setLevel(logging.INFO)
 fh = logging.StreamHandler()
 fh.setLevel(logging.INFO)
@@ -19,123 +30,115 @@ fh.setFormatter(formatter)
 # add the handlers to the logger
 logger.addHandler(fh)
 
+
+csv_file_path = 'kontostaende.csv'
+
+# Prüfen, ob die Datei bereits existiert
+file_exists = os.path.isfile(csv_file_path)
+
+
 opts = Options()
-opts.headless = True
+opts.headless = False
+#opts.add_experimental_option('prefs', {'profile.default_content_setting_values.cookies': 1})
 logging.info("Starte FireFox")
-browser = Firefox(options=opts)
+
+options = webdriver.ChromeOptions()
+
+# Set preferences to enable cookies
+options.add_experimental_option('prefs', {'profile.default_content_setting_values.cookies': 1})
+options.add_experimental_option('prefs', {"profile.block_third_party_cookies": False})
+
+
+
+
+
+#browser = Firefox(options=opts)
 
 #Setzen der Variablen
 url = os.environ.get('URL')
 picturepath = os.environ.get('PICTUREPATH', '/tmp/home')
-zugangsnummer = os.environ.get('ZUGANGSNUMMER')
+zugangsnummer_1 = os.environ.get('ZUGANGSNUMMER_1')
+zugangsnummer_2 = os.environ.get('ZUGANGSNUMMER_2')
+zugangsnummern = [zugangsnummer_1, zugangsnummer_2]
 pin = os.environ.get('PIN')
-key = os.environ.get('KEY')
-telegrambotkey = os.environ.get('TELEGRAMBOTKEY')
-chatid = os.environ.get('CHATID')
+gmail_pin = os.environ.get('GMAIL_PIN')
+gmail_from = os.environ.get('GMAIL_FROM_ADDRESS')
+gmail_to = os.environ.get('GMAIL_TO_ADRESS')
 
-logging.info("Oeffne Startseite")
+for zugangsnummer in zugangsnummern:
+    logging.info("Oeffne Startseite")
+    # Launch the browser with the modified preferences
+    browser = webdriver.Chrome(options=options)
+    browser.get(url)
+    # Startseite#
+    #/html/body/div[3]
+    # Wait for the cookie popup to appear (adjust the timeout as needed)
 
-# Startseite
-browser.get(url)
-time.sleep(30)
-try:
-    browser.get_screenshot_as_file(picturepath + "/1.png")
-except WebDriverException:
-    logging.info("Bild 1 konnte nicht gespeichert werden.")
+    popup_element = WebDriverWait(browser, 10).until(
+        EC.presence_of_element_located((By.XPATH, '//*[contains(@id, "overlay-content--")]'))
+    )
 
-browser.find_element_by_xpath("/html/body/div[1]/div/main/div[2]/div/fieldset/div/form/div[1]/span/input").send_keys(zugangsnummer)
-browser.find_element_by_xpath("/html/body/div[1]/div/main/div[2]/div/fieldset/div/form/div[2]/span/input").send_keys(pin)
+    zugang_field = browser.find_element(By.XPATH, '//*[@id="id6"]')
 
-# Keyeingabe
-browser.find_element_by_xpath('/html/body/div[1]/div/main/div[2]/div/fieldset/div/form/div[3]/div/div/div[1]/button').submit()
-time.sleep(20)
-try:
-    browser.get_screenshot_as_file(picturepath + "/2.png")
-except WebDriverException:
-    logging.info("Bild 2 konnte nicht gespeichert werden.")
+    while True:
+        try:
+            zugang_field.send_keys(zugangsnummer)
+            break
+        except Exception:
+            sleep(2)
+    pin_field = browser.find_element(By.XPATH, '//*[@id="id7"]')
+    pin_field.send_keys(pin)
 
-# Es werden alle 6 Felder geprüft und bei Bedarf befüllt.
-keybuttons = ["/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[3]/div[4]/a[1]",
-              "/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[3]/div[1]/a[1]",
-              "/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[3]/div[1]/a[2]",
-              "/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[3]/div[1]/a[3]",
-              "/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[3]/div[2]/a[1]",
-              "/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[3]/div[2]/a[2]",
-              "/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[3]/div[2]/a[3]",
-              "/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[3]/div[3]/a[1]",
-              "/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[3]/div[3]/a[2]",
-              "/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[3]/div[3]/a[3]"]
+    # Keyeingabe
+    try:
+        browser.find_element(By.XPATH, '//*[@id="ida"]').click()
+        # //*[@id="id19"]/label[1]/span[2]
+        # //*[@id="id19"]/label[1]/span[2]
+        browser.find_element(By.XPATH, '//*[@id="id19"]/label[1]/span[1]').click()
+        browser.find_element(By.XPATH, '//*[@id="id17"]').click()
+    except Exception:
+        pass
+# //*[@id="id897bb87e"]/span[1]
+# /html/body/div[1]/div/main/div/div[1]/div/section[2]/div[1]/div/div/div[2]/a/span[5]/span[1]
+    # creates SMTP session
+    # s = smtplib.SMTP('smtp.gmail.com', 587, timeout=10)
+    # # start TLS for security
+    # s.starttls()
+    # # Authentication
+    # s.login(gmail_from, gmail_pin)
+    # # message to be sent
+    # message = "Subject: Kontostandsabfrage ING\nBitte bestaetige die Kontostandsabfrage in der Ing Banking App in den naechsten 20 Minuten."
+    # # sending the mail
+    # s.sendmail(gmail_from, gmail_to, message)
+    # # terminating the session
+    # s.quit()
 
-for i in range(len(key)):
-    keyfield = browser.find_element_by_xpath("/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[2]/ul/li[" + str(i+1) + "]")
-    if keyfield.get_attribute("class") == "active focus":
-        logging.info(key[i])
-        browser.find_element_by_xpath(keybuttons[int(key[i])]).click()
-        time.sleep(5)
-        break
+    balance = WebDriverWait(browser, 1200).until(
+        EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/main/div/div[1]/div/section[2]/div[1]/div/div/div[2]/a/span[5]/span[1]'))).text
+    browser.close()
 
+    data = [
+    {'date': datetime.now().strftime('%Y-%m-%d'), 'bank account': zugangsnummer, 'balance': balance.replace('.', '')},
+    ]
+    mode = 'a' if file_exists else 'w'
+    last_id = 0
+    with open(csv_file_path, mode, newline='') as csvfile:
+        fieldnames = ['id', 'date', 'bank account', 'balance']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-try:
-    browser.get_screenshot_as_file(picturepath + "/3.png")
-except WebDriverException:
-    logging.info("Bild 3 konnte nicht gespeichert werden.")
+        if not file_exists:
+            writer.writeheader()
+            file_exists = True
+        else:
+            # Wenn die Datei existiert, finde die letzte ID
+            with open(csv_file_path, 'r', newline='') as csvfile:
+                reader = csv.DictReader(csvfile)
+                last_row = None
+                for last_row in reader:
+                    pass
+                last_id = int(last_row['id']) if last_row else 0
 
-for j in range(len(key)):
-    keyfield = browser.find_element_by_xpath("/html/body/div[1]/div/main/div/div/form/div/div[1]/div[2]/div/div[2]/ul/li[" + str(j+1) + "]")
-    if keyfield.get_attribute("class") == "active focus":
-        logging.info(key[j])
-        browser.find_element_by_xpath(keybuttons[int(key[j])]).click()
-        time.sleep(5)
-        break
-
-
-try:
-    browser.get_screenshot_as_file(picturepath + "/4.png")
-except WebDriverException:
-    logging.info("Bild 4 konnte nicht gespeichert werden.")
-
-browser.find_element_by_xpath("/html/body/div[1]/div/main/div/div/form/div/section/div/button[1]").click()
-time.sleep(30)
-
-try:
-    browser.get_screenshot_as_file(picturepath + "/5.png")
-except WebDriverException:
-    logging.info("Bild 5 konnte nicht gespeichert werden.")
-balance = browser.find_element_by_xpath('/html/body/div[1]/div/main/div/div/div/section[2]/div[1]/div[1]/div[1]/div[2]/a/span[4]/span[1]').text
-
-logging.info(balance)
-
-# Logout
-browser.get('https://banking.ing.de/app/logout')
-time.sleep(20)
-try:
-    browser.get_screenshot_as_file(picturepath + "/6.png")
-except WebDriverException:
-    logging.info("Screenshot 6 kann nicht gespeichert werden...")
-
-browser.quit()
-
-# Alten Wert aus Datei lesen und vergleichen
-my_file = Path(picturepath + "/balance.txt")
-if not my_file.exists():
-    filestore = open(picturepath + "/balance.txt", "w")
-    filestore.write("0")
-    filestore.close()
-
-filestore = open(picturepath + "/balance.txt", "r")
-oldbalance = filestore.read()
-filestore.close()
-
-text = ""
-if balance != oldbalance:
-    text = "ING-Diba: Neue Kontobewegung - Änderung von " + oldbalance + "€ auf " + balance + "€"
-    payload = {'chat_id': chatid, 'text': text}
-    result = urlencode(payload, quote_via=quote_plus)
-    r = requests.get("https://api.telegram.org/" + telegrambotkey + "/sendMessage?" + result)
-    logging.info(r.json())
-    filestore = open(picturepath + "/balance.txt", "w")
-    filestore.write(balance)
-    filestore.close()
-
-
-exit(0)
+        # Schreibe die Daten in die CSV-Datei
+        for idx, row in enumerate(data, start=last_id + 1):
+            row['id'] = idx
+            writer.writerow(row)

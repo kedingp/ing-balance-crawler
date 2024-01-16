@@ -3,6 +3,10 @@ run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
   schedule:
     - cron: '0 10 * * *'  # Run every day at 10 AM UTC
+  push:
+    branches:
+      - '*'
+
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
@@ -11,6 +15,7 @@ jobs:
       GMAIL_PIN: ${{ secrets.GMAIL_PIN }}
       GMAIL_FROM_ADDRESS: ${{ secrets.GMAIL_FROM_ADDRESS }}
       GMAIL_TO_ADRESS: ${{ secrets.GMAIL_TO_ADRESS }}
+      DROPBOX_API_KEY: ${{ secrets.DROPBOX_API_KEY }}
 
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
@@ -36,6 +41,11 @@ jobs:
           GMAIL_PIN: ${{ secrets.GMAIL_PIN }}
           GMAIL_FROM_ADDRESS: ${{ secrets.GMAIL_FROM_ADDRESS }}
           GMAIL_TO_ADRESS: ${{ secrets.GMAIL_TO_ADRESS }}
+
+      - name: Run dropbox connection
+        run: python check_dropbox.py
+        env:
+          DROPBOX_API_KEY: ${{ secrets.DROPBOX_API_KEY }}
 
       - name: List files in the repository
         run: |

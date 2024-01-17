@@ -53,4 +53,4 @@ def upload_file(access_token):
 
 if __name__ == "__main__":
     dropbox_api_key =  dropbox_oauth.get_access_token()
-    print(get_file(dropbox_api_key, 'existing.csv'))
+    print(get_file(dropbox_api_key, '/existing.csv'))

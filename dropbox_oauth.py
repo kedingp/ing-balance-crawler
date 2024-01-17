@@ -6,15 +6,15 @@ import os
 url = 'https://api.dropboxapi.com/oauth2/token'
 app_key = os.environ.get('DROPBOX_KEY')
 app_secret = os.environ.get('DROPBOX_SECRET')
-access_code = os.environ.get("DROPBOX_AUTH_CODE")
+refresh_token = os.environ.get("DROPBOX_REFRESH_TOKEN")
 
 headers = {
     'Content-Type': 'application/x-www-form-urlencoded'
 }
 
 data = {
-    'code': access_code,
-    'grant_type': 'authorization_code'
+    'code': refresh_token,
+    'grant_type': 'refresh_token'
 }
 
 auth = (app_key, app_secret)

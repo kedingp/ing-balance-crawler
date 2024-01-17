@@ -22,7 +22,7 @@ jobs:
       ING_PIN: ${{ secrets.ING_PIN }}
       DROPBOX_KEY: ${{ secrets.DROPBOX_KEY }}
       DROPBOX_SECRET: ${{ secrets.DROPBOX_SECRET }}
-      DROPBOX_AUTH_CODE: ${{ secrets.DROPBOX_AUTH_CODE }}
+      DROPBOX_REFRESH_TOKEN: ${{ secrets.DROPBOX_REFRESH_TOKEN }}
 
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."

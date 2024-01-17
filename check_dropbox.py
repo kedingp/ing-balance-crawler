@@ -35,13 +35,14 @@ def all_files_in_folder(access_token):
 def get_file(access_token, file_path):
         # Initialize Dropbox client
     dbx = dropbox.Dropbox(access_token)
+    local_file_path = file_path.strip('/')
 
     # Download the file from Dropbox
     try:
-        with open(file_path, 'wb') as local_file:
+        with open(local_file_path, 'wb') as local_file:
             _, response = dbx.files_download(file_path)
             local_file.write(response.content)
-        print(f"File '{file_path}' downloaded successfully to '{file_path}'.")
+        print(f"File '{file_path}' downloaded successfully to '{local_file_path}'.")
     except dropbox.exceptions.HttpError as e:
         print(f"Error downloading file: {e}")
     except Exception as e:

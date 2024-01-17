@@ -3,7 +3,7 @@ import json
 import os
 
 
-dropbox_api_key = os.environ.get('DROPBOX_API_KEY')
+dropbox_refresh_token =  os.environ.get('DROPBOX_REFRESH_TOKEN')
 
 
 

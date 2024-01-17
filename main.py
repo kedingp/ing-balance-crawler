@@ -1,24 +1,18 @@
 import logging
+import smtplib
 import csv
 import os
-import requests
-import time
-import dotenv
-import pickle
 from time import sleep
-import smtplib
 from datetime import datetime
 
 
-from selenium.webdriver import Firefox
-from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from urllib.parse import urlencode, quote_plus
-from pathlib import Path
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import dropbox_oauth
+import check_dropbox
 
 logger = logging.getLogger("myLogger")
 logger.setLevel(logging.INFO)
@@ -30,45 +24,36 @@ fh.setFormatter(formatter)
 # add the handlers to the logger
 logger.addHandler(fh)
 
-
-csv_file_path = 'kontostaende.csv'
-
-# Prüfen, ob die Datei bereits existiert
-file_exists = os.path.isfile(csv_file_path)
-
-
-opts = Options()
-opts.headless = False
 #opts.add_experimental_option('prefs', {'profile.default_content_setting_values.cookies': 1})
-logging.info("Starte FireFox")
-
-options = webdriver.ChromeOptions()
-
-# Set preferences to enable cookies
-options.add_experimental_option('prefs', {'profile.default_content_setting_values.cookies': 1})
-options.add_experimental_option('prefs', {"profile.block_third_party_cookies": False})
+logging.info("Starte Chrome")
 
 
-
-
-
-#browser = Firefox(options=opts)
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--disable-gpu")
 
 #Setzen der Variablen
-url = os.environ.get('URL')
-picturepath = os.environ.get('PICTUREPATH', '/tmp/home')
-zugangsnummer_1 = os.environ.get('ZUGANGSNUMMER_1')
-zugangsnummer_2 = os.environ.get('ZUGANGSNUMMER_2')
+url = os.environ.get('ING_URL')
+zugangsnummer_1 = os.environ.get('ING_ZUGANGSNUMMER_1')
+zugangsnummer_2 = os.environ.get('ING_ZUGANGSNUMMER_2')
 zugangsnummern = [zugangsnummer_1, zugangsnummer_2]
-pin = os.environ.get('PIN')
+pin = os.environ.get('ING_PIN')
 gmail_pin = os.environ.get('GMAIL_PIN')
 gmail_from = os.environ.get('GMAIL_FROM_ADDRESS')
 gmail_to = os.environ.get('GMAIL_TO_ADRESS')
+dropbox_access_token = dropbox_oauth.get_access_token()
+csv_file_path = 'kontostaende.csv'
+dropbox_file_path= '/' + csv_file_path
+
+# Prüfen, ob die Datei bereits existiert
+file_exists = csv_file_path in check_dropbox.all_files_in_folder(dropbox_access_token)
+if file_exists:
+    check_dropbox.download(dropbox_access_token, dropbox_file_path, csv_file_path)
 
 for zugangsnummer in zugangsnummern:
     logging.info("Oeffne Startseite")
     # Launch the browser with the modified preferences
-    browser = webdriver.Chrome(options=options)
+    browser = webdriver.Chrome(options=chrome_options)
     browser.get(url)
     # Startseite#
     #/html/body/div[3]
@@ -77,14 +62,39 @@ for zugangsnummer in zugangsnummern:
     popup_element = WebDriverWait(browser, 10).until(
         EC.presence_of_element_located((By.XPATH, '//*[contains(@id, "overlay-content--")]'))
     )
+# //*[@id="dialogContent-na3zqnfcsp"]//ing-cc-button-87217[1]
+    #//*[@id="dialogContent-gnkpwj47d6"]
+# /html/body/div[3]/div[2]/ing-cc-dialog-frame-87215/ing-cc-dialog-level0-87212//ing-cc-button-87217[1]
+    #//*[@id="dialogContent-6nx5r5surc"]
+    # Now, find the specific button within the popup using a relative XPath
+    # //*[@id="dialogContent-cqnsdh0e0b"]
+    # //*[@id="dialogContent-cqnsdh0e0b"]//div[3]
+    #//*[@id="dialogContent-1cwzaejzzw"]//div[3]/a[1]//*[@id="dialogContent-znjvxpr4uk"]//ing-cc-button-40828[1]
+    #//*[@id="dialogContent-h260cn1xz3"]
+    input = """return document.querySelector('[id^="dialogContent-"]').shadowRoot.querySelector('[data-tag-name="ing-cc-button"]')"""
+
+    WebDriverWait(browser, 20).until(EC.element_to_be_clickable((browser.execute_script(input)))).click()
+
+    # def expand_shadow_element(element):
+    #     shadow_root = browser.execute_script('return arguments[0].shadowRoot', element)
+    #     return shadow_root
+
+    # outer = expand_shadow_element(popup_element)
+    # inner = outer.find_element(By.XPATH, '//*[contains(@id, "ing-cc-button")]')
+    # inner.click()
+        
+
 
     zugang_field = browser.find_element(By.XPATH, '//*[@id="id6"]')
-
+    counter = 0
     while True:
         try:
             zugang_field.send_keys(zugangsnummer)
             break
         except Exception:
+            if counter >= 5:
+                raise Exception("Cookies haven't been accepted. Stop continuation.")
+            counter += 1
             sleep(2)
     pin_field = browser.find_element(By.XPATH, '//*[@id="id7"]')
     pin_field.send_keys(pin)
@@ -92,31 +102,27 @@ for zugangsnummer in zugangsnummern:
     # Keyeingabe
     try:
         browser.find_element(By.XPATH, '//*[@id="ida"]').click()
-        # //*[@id="id19"]/label[1]/span[2]
-        # //*[@id="id19"]/label[1]/span[2]
         browser.find_element(By.XPATH, '//*[@id="id19"]/label[1]/span[1]').click()
         browser.find_element(By.XPATH, '//*[@id="id17"]').click()
     except Exception:
         pass
-# //*[@id="id897bb87e"]/span[1]
-# /html/body/div[1]/div/main/div/div[1]/div/section[2]/div[1]/div/div/div[2]/a/span[5]/span[1]
-    # creates SMTP session
-    # s = smtplib.SMTP('smtp.gmail.com', 587, timeout=10)
-    # # start TLS for security
-    # s.starttls()
-    # # Authentication
-    # s.login(gmail_from, gmail_pin)
-    # # message to be sent
-    # message = "Subject: Kontostandsabfrage ING\nBitte bestaetige die Kontostandsabfrage in der Ing Banking App in den naechsten 20 Minuten."
-    # # sending the mail
-    # s.sendmail(gmail_from, gmail_to, message)
-    # # terminating the session
-    # s.quit()
+    s = smtplib.SMTP('smtp.gmail.com', 587, timeout=10)
+    # start TLS for security
+    s.starttls()
+    # Authentication
+    s.login(gmail_from, gmail_pin)
+    # message to be sent
+    message = f"Subject: Kontostandsabfrage ING\nBitte bestaetige die Kontostandsabfrage fuer das Konto {zugangsnummer} in der Ing Banking App in den naechsten 20 Minuten."
+    # sending the mail
+    s.sendmail(gmail_from, gmail_to, message)
+    # terminating the session
+    s.quit()
 
     balance = WebDriverWait(browser, 1200).until(
         EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/main/div/div[1]/div/section[2]/div[1]/div/div/div[2]/a/span[5]/span[1]'))).text
     browser.close()
 
+    print(f"balance: {balance}")
     data = [
     {'date': datetime.now().strftime('%Y-%m-%d'), 'bank account': zugangsnummer, 'balance': balance.replace('.', '')},
     ]
@@ -142,3 +148,5 @@ for zugangsnummer in zugangsnummern:
         for idx, row in enumerate(data, start=last_id + 1):
             row['id'] = idx
             writer.writerow(row)
+
+check_dropbox.upload_file(dropbox_access_token, csv_file_path, dropbox_file_path)

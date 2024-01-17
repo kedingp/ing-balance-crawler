@@ -12,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import dropbox_oauth
+import check_dropbox
 
 logger = logging.getLogger("myLogger")
 logger.setLevel(logging.INFO)
@@ -24,10 +25,7 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 
-csv_file_path = 'kontostaende.csv'
 
-# Prüfen, ob die Datei bereits existiert
-file_exists = os.path.isfile(csv_file_path)
 
 
 #opts.add_experimental_option('prefs', {'profile.default_content_setting_values.cookies': 1})
@@ -53,6 +51,10 @@ gmail_pin = os.environ.get('GMAIL_PIN')
 gmail_from = os.environ.get('GMAIL_FROM_ADDRESS')
 gmail_to = os.environ.get('GMAIL_TO_ADRESS')
 dropbox_access_token = dropbox_oauth.get_access_token()
+csv_file_path = 'kontostaende.csv'
+
+# Prüfen, ob die Datei bereits existiert
+file_exists = csv_file_path in check_dropbox.all_files_in_folder(dropbox_access_token)
 
 for zugangsnummer in zugangsnummern:
     logging.info("Oeffne Startseite")

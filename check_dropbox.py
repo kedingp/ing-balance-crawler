@@ -1,6 +1,7 @@
 import requests
 import json
 import dropbox_oauth
+import dropbox
 
 def all_files_in_folder(access_token):
     url = "https://api.dropboxapi.com/2/files/list_folder"
@@ -30,6 +31,26 @@ def all_files_in_folder(access_token):
         print(f"Error: {response.status_code}, {response.text}")
         return None
 
+
+def get_file(access_token, file_path):
+        # Initialize Dropbox client
+    dbx = dropbox.Dropbox(access_token)
+
+    # Download the file from Dropbox
+    try:
+        with open(file_path, 'wb') as local_file:
+            _, response = dbx.files_download(file_path)
+            local_file.write(response.content)
+        print(f"File '{file_path}' downloaded successfully to '{file_path}'.")
+    except dropbox.exceptions.HttpError as e:
+        print(f"Error downloading file: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        pass
+
+def upload_file(access_token):
+    pass
+
 if __name__ == "__main__":
     dropbox_api_key =  dropbox_oauth.get_access_token()
-    print(all_files_in_folder(dropbox_api_key))
+    print(get_file(dropbox_api_key, 'existing.csv'))

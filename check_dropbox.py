@@ -2,6 +2,7 @@ import requests
 import json
 import dropbox_oauth
 import dropbox
+import os
 
 def all_files_in_folder(access_token):
     url = "https://api.dropboxapi.com/2/files/list_folder"
@@ -32,6 +33,23 @@ def all_files_in_folder(access_token):
         return None
 
 
+def download(dropbox_access_token, dropbox_file_path, local_file_path):
+    dbx = dropbox.Dropbox(dropbox_access_token)
+    # Get the current working directory
+    current_directory = os.getcwd()
+
+    # Full local file path
+    full_local_path = os.path.join(current_directory, local_file_path)
+
+    # Download the file from Dropbox and append to it
+    with open(full_local_path, 'w', encoding='utf-8') as local_file:
+        _, response = dbx.files_download(dropbox_file_path)
+        local_file.write(response.content.decode('utf-8'))
+
+    print(f"Data from '{dropbox_file_path}' written successfully to '{full_local_path}'.")
+
+
+
 def get_file(access_token, file_path):
         # Initialize Dropbox client
     dbx = dropbox.Dropbox(access_token)
@@ -54,4 +72,10 @@ def upload_file(access_token):
 
 if __name__ == "__main__":
     dropbox_api_key =  dropbox_oauth.get_access_token()
-    print(get_file(dropbox_api_key, '/existing.csv'))
+    file_path = 'existing.csv'
+    if file_path in all_files_in_folder(dropbox_api_key):
+        print("file is available. start download")
+        dropbox_path = '/' + file_path
+        download(dropbox_api_key, dropbox_path, file_path)
+    else:
+        print("File does not exist")

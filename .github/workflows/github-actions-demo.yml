@@ -3,9 +3,7 @@ run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
   schedule:
     - cron: '0 13 * * *'  # Run every day at 13 AM UTC
-  push:
-    branches:
-      - '*'
+
 
 jobs:
   Explore-GitHub-Actions:
@@ -44,9 +42,7 @@ jobs:
 
 
       - name: Run main 
-        run: |
-          date
-        
+        run: python main.py
 
       - name: List files in the repository
         run: |

@@ -2,10 +2,6 @@ import requests
 import json
 import dropbox_oauth
 
-
-
-
-
 def all_files_in_folder(access_token):
     url = "https://api.dropboxapi.com/2/files/list_folder"
 
@@ -36,4 +32,4 @@ def all_files_in_folder(access_token):
 
 if __name__ == "__main__":
     dropbox_api_key =  dropbox_oauth.get_access_token()
-    all_files_in_folder(dropbox_api_key)
+    print(all_files_in_folder(dropbox_api_key))

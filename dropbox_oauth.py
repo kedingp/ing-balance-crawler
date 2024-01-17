@@ -34,5 +34,3 @@ def get_access_token():
         # Print the error message if the request was not successful
         print(f"Error: {response.status_code}, {response.text}")
         return None
-
-print(f"Access token: {get_access_token()}")

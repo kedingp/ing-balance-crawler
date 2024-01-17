@@ -42,11 +42,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run dropbox authentication
-        run: python dropbox_oauth.py
 
-      - name: Run main.py
-        run: python main.py
+      - name: Run chekck dropbox 
+        run: python check_dropbox.py
 
       - name: List files in the repository
         run: |

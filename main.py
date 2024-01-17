@@ -11,6 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import dropbox_oauth
 
 logger = logging.getLogger("myLogger")
 logger.setLevel(logging.INFO)
@@ -51,6 +52,7 @@ pin = os.environ.get('ING_PIN')
 gmail_pin = os.environ.get('GMAIL_PIN')
 gmail_from = os.environ.get('GMAIL_FROM_ADDRESS')
 gmail_to = os.environ.get('GMAIL_TO_ADRESS')
+dropbox_access_token = dropbox_oauth.get_access_token()
 
 for zugangsnummer in zugangsnummern:
     logging.info("Oeffne Startseite")

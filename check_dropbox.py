@@ -1,9 +1,10 @@
 import requests
 import json
 import os
+import dropbox_oauth
 
 
-dropbox_refresh_token =  os.environ.get('DROPBOX_REFRESH_TOKEN')
+dropbox_api_key =  dropbox_oauth.get_access_token()
 
 
 

@@ -3,6 +3,7 @@ import json
 import dropbox_oauth
 import dropbox
 import os
+import csv
 
 def all_files_in_folder(access_token):
     url = "https://api.dropboxapi.com/2/files/list_folder"
@@ -72,10 +73,21 @@ def upload_file(access_token):
 
 if __name__ == "__main__":
     dropbox_api_key =  dropbox_oauth.get_access_token()
-    file_path = 'existing.csv'
-    if file_path in all_files_in_folder(dropbox_api_key):
-        print("file is available. start download")
-        dropbox_path = '/' + file_path
-        download(dropbox_api_key, dropbox_path, file_path)
-    else:
-        print("File does not exist")
+    dbx = dropbox.Dropbox(dropbox_api_key)
+    csv_file_path = 'kontostaende.csv'
+    with open(csv_file_path, 'w', newline='') as csvfile:
+        fieldnames = ['id', 'date', 'bank account', 'balance']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+    # Upload the modified file back to Dropbox
+    with open(csv_file_path, 'rb') as local_file:
+        dbx.files_upload(local_file.read(), '/kontostaende.csv', mode=dropbox.files.WriteMode('overwrite'))
+
+    # file_path = 'existing.csv'
+    # if file_path in all_files_in_folder(dropbox_api_key):
+    #     print("file is available. start download")
+    #     dropbox_path = '/' + file_path
+    #     download(dropbox_api_key, dropbox_path, file_path)
+    # else:
+    #     print("File does not exist")

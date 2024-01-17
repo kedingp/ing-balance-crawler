@@ -51,29 +51,13 @@ def download(dropbox_access_token, dropbox_file_path, local_file_path):
 
 
 
-def get_file(access_token, file_path):
-        # Initialize Dropbox client
+def upload_file(access_token, local_file_path, dropbox_file_path):
     dbx = dropbox.Dropbox(access_token)
-    local_file_path = file_path.strip('/')
-
-    # Download the file from Dropbox
-    try:
-        with open(local_file_path, 'wb') as local_file:
-            _, response = dbx.files_download(file_path)
-            local_file.write(response.content)
-        print(f"File '{file_path}' downloaded successfully to '{local_file_path}'.")
-    except dropbox.exceptions.HttpError as e:
-        print(f"Error downloading file: {e}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-        pass
-
-def upload_file(access_token):
-    pass
+    with open(local_file_path, 'rb') as local_file:
+        dbx.files_upload(local_file.read(), dropbox_file_path, mode=dropbox.files.WriteMode('overwrite'))
 
 if __name__ == "__main__":
     dropbox_api_key =  dropbox_oauth.get_access_token()
-    dbx = dropbox.Dropbox(dropbox_api_key)
     csv_file_path = 'kontostaende.csv'
     with open(csv_file_path, 'w', newline='') as csvfile:
         fieldnames = ['id', 'date', 'bank account', 'balance']
@@ -81,8 +65,7 @@ if __name__ == "__main__":
 
         writer.writeheader()
     # Upload the modified file back to Dropbox
-    with open(csv_file_path, 'rb') as local_file:
-        dbx.files_upload(local_file.read(), '/kontostaende.csv', mode=dropbox.files.WriteMode('overwrite'))
+    
 
     # file_path = 'existing.csv'
     # if file_path in all_files_in_folder(dropbox_api_key):

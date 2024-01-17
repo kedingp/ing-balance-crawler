@@ -43,8 +43,8 @@ jobs:
           pip install -r requirements.txt
 
 
-      - name: Run chekck dropbox 
-        run: python check_dropbox.py
+      - name: Run main 
+        run: python main.py
 
       - name: List files in the repository
         run: |

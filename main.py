@@ -24,10 +24,6 @@ fh.setFormatter(formatter)
 # add the handlers to the logger
 logger.addHandler(fh)
 
-
-
-
-
 #opts.add_experimental_option('prefs', {'profile.default_content_setting_values.cookies': 1})
 logging.info("Starte Chrome")
 
@@ -35,11 +31,6 @@ logging.info("Starte Chrome")
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-gpu")
-
-
-
-
-#browser = Firefox(options=opts)
 
 #Setzen der Variablen
 url = os.environ.get('ING_URL')
@@ -52,9 +43,12 @@ gmail_from = os.environ.get('GMAIL_FROM_ADDRESS')
 gmail_to = os.environ.get('GMAIL_TO_ADRESS')
 dropbox_access_token = dropbox_oauth.get_access_token()
 csv_file_path = 'kontostaende.csv'
+dropbox_file_path= '/' + csv_file_path
 
 # Prüfen, ob die Datei bereits existiert
 file_exists = csv_file_path in check_dropbox.all_files_in_folder(dropbox_access_token)
+if file_exists:
+    check_dropbox.download(dropbox_access_token, dropbox_file_path, csv_file_path)
 
 for zugangsnummer in zugangsnummern:
     logging.info("Oeffne Startseite")
@@ -154,3 +148,5 @@ for zugangsnummer in zugangsnummern:
         for idx, row in enumerate(data, start=last_id + 1):
             row['id'] = idx
             writer.writerow(row)
+
+check_dropbox.upload_file(dropbox_access_token, csv_file_path, dropbox_file_path)

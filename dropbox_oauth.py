@@ -1,29 +1,23 @@
 #!/usr/bin/env python3
+
+import requests
 import os
-import dropbox
-from dropbox import DropboxOAuth2FlowNoRedirect
 
-'''
-This example walks through a basic oauth flow using the existing long-lived token type
-Populate your app key and app secret in order to run this locally
-'''
-APP_KEY = os.environ.get('DROPBOX_KEY')
-APP_SECRET = os.environ.get('DROPBOX_SECRET')
+url = 'https://api.dropboxapi.com/oauth2/token'
+app_key = os.environ.get('DROPBOX_KEY')
+app_secret = os.environ.get('DROPBOX_SECRET')
+access_code = os.environ.get("DROPBOX_AUTH_CODE")
 
-auth_flow = DropboxOAuth2FlowNoRedirect(APP_KEY, APP_SECRET, token_access_type="offline")
+headers = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+}
 
-authorize_url = auth_flow.start()
-auth_code = os.environ.get("DROPBOX_AUTH_CODE")
+data = {
+    'code': access_code,
+    'grant_type': 'authorization_code'
+}
 
-try:
-    oauth_result = auth_flow.finish(auth_code)
-except Exception as e:
-    print('Error: %s' % (e,))
-    exit(1)
+auth = (app_key, app_secret)
+response = requests.post(url, headers=headers, data=data, auth=auth)
 
-print(f"Access token: {oauth_result.access_token}")
-print(f"Refresh token: {oauth_result.refresh_token}")
-
-with dropbox.Dropbox(oauth2_access_token=oauth_result.access_token) as dbx:
-    dbx.users_get_current_account()
-    print("Successfully set up client!")
+print(response.text)

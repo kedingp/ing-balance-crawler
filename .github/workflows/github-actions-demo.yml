@@ -48,9 +48,6 @@ jobs:
       - name: Run main.py
         run: python main.py
 
-      - name: Run dropbox connection
-        run: python check_dropbox.py
-
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}

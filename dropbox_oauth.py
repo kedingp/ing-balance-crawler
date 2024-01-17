@@ -13,7 +13,7 @@ headers = {
 }
 
 data = {
-    'code': refresh_token,
+    'refresh_token': refresh_token,
     'grant_type': 'refresh_token'
 }
 

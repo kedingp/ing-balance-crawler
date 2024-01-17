@@ -1,8 +1,8 @@
-name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+name: Automated account balance check
+
 on:
   schedule:
-    - cron: '0 13 * * *'  # Run every day at 13 AM UTC
+    - cron: '0 13 * * *'  # Run every day at 1 pm UTC
 
 
 jobs:
@@ -43,8 +43,3 @@ jobs:
 
       - name: Run main 
         run: python main.py
-
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."

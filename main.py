@@ -11,6 +11,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import dropbox_utility
 
+login_attempts = 0
 
 def write_mail(from_address, to_address, message):
     # send email
@@ -19,7 +20,6 @@ def write_mail(from_address, to_address, message):
     s.login(from_address, gmail_pin)
     s.sendmail(from_address, to_address, message)
     s.quit()
-
 
 try:
     chrome_options = Options()
@@ -48,8 +48,8 @@ try:
             dropbox_access_token, dropbox_file_path, csv_file_path
         )
 
-    for zugangsnummer in zugangsnummern:
-        # Launch the browser with the modified preferences
+    def get_balance():
+        global login_attempts
         browser = webdriver.Chrome(options=chrome_options)
         browser.get(url)
 
@@ -73,33 +73,47 @@ try:
         pin_field = browser.find_element(By.XPATH, '//*[@id="id7"]')
         pin_field.send_keys(ing_pin)
 
-        # Necessary for some accounts
+        # Necessary for accounts with more than one banking app atached
         try:
             browser.find_element(By.XPATH, '//*[@id="ida"]').click()
             browser.find_element(By.XPATH, '//*[@id="id19"]/label[1]/span[1]').click()
             browser.find_element(By.XPATH, '//*[@id="id17"]').click()
         except Exception:
             pass
+        
+        try:
+            result = (
+                WebDriverWait(browser, 300)
+                .until(
+                    EC.presence_of_element_located(
+                        (
+                            By.XPATH,
+                            "/html/body/div[1]/div/main/div/div[1]/div/section[2]/div[1]/div/div/div[2]/a/span[5]/span[1]",
+                        )
+                    )
+                )
+                .text
+            )
+        except Exception:
+            browser.close()
+            if login_attempts > 4:
+                return None
+            login_attempts += 1
+            get_balance()
+        browser.close()
+        return result
 
+
+    for zugangsnummer in zugangsnummern:
         message = f"Subject: Kontostandsabfrage ING\nBitte bestaetige die Kontostandsabfrage fuer das Konto {zugangsnummer} in der Ing Banking App in den naechsten 20 Minuten."
         write_mail(gmail_from, gmail_to, message)
 
-        print(f"Waiting for two-factor authentication for account {zugangsnummer}...")
-
-        balance = (
-            WebDriverWait(browser, 1200)
-            .until(
-                EC.presence_of_element_located(
-                    (
-                        By.XPATH,
-                        "/html/body/div[1]/div/main/div/div[1]/div/section[2]/div[1]/div/div/div[2]/a/span[5]/span[1]",
-                    )
-                )
-            )
-            .text
-        )
-        browser.close()
-        print(f"Received two-factor authentication for account {zugangsnummer}!")
+        # Launch the browser with the modified preferences
+        print("Waiting for two-factor authentication...")
+        balance = get_balance()
+        if not balance:
+            raise ValueError("Two-factor authentication timed out!")
+        print("Received two-factor authentication!")
 
         data = [
             {
@@ -133,5 +147,5 @@ try:
     dropbox_utility.upload_file(dropbox_access_token, csv_file_path, dropbox_file_path)
 
 except Exception as e:
-    message = "Subject: Fehler in Kontostandsabfrage ING\nEs gab einen Fehler bei der Kontostandsabfrage. Bitte kontrolliere die Pipeline."
+    message = f"Subject: Fehler in Kontostandsabfrage ING\nEs gab einen Fehler bei der Kontostandsabfrage: {e}. Bitte kontrolliere die Pipeline."
     write_mail(gmail_from, gmail_to, message)

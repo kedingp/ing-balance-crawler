@@ -3,6 +3,9 @@ name: Automated account balance check
 on:
   schedule:
     - cron: '37 7 * * *'  # Run every day at 1 pm UTC
+  push:
+    branches:
+      - '*'
 
 jobs:
   Explore-GitHub-Actions:

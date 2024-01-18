@@ -4,9 +4,7 @@ run-name: Automated account balance check
 on:
   schedule:
     - cron: '37 7 * * *'  # Run every day at 1 pm UTC
-  push:
-    branches:
-      - '*'
+  workflow_dispatch:
 
 jobs:
   Explore-GitHub-Actions:

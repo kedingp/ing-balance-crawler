@@ -1,4 +1,5 @@
 name: Automated account balance check
+run-name: Automated account balance check
 
 on:
   schedule:

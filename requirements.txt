@@ -2,3 +2,4 @@ requests
 selenium
 python-dotenv
 dropbox
+typing-extensions
